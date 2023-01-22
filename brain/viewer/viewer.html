@@ -1,0 +1,50 @@
+<!doctype>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fetchbot Brain Viewer</title>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta name="google" content="notranslate">
+<link rel="icon" type="image/png"  href="img/favicon.png">
+<link rel="stylesheet" type="text/css"  href="viewer.css">
+
+<body>
+<article>
+
+<div id="hud" class="column">
+<div id="ruler-x">
+    <span id="x-rule-0">0</span
+    ><span id="x-rule-1"></span
+    ><span id="x-rule-2"></span
+    ><span id="x-rule-3"></span
+    ><span id="x-rule-4"></span>
+</div>
+<div id="ruler-y">
+    <span id="y-rule-0">0</span>
+    <span id="y-rule-1"></span>
+    <span id="y-rule-2"></span>
+    <span id="y-rule-3"></span>
+    <span id="y-rule-4"></span>
+</div>
+<div id="vizualize"></div>
+
+<div style="clear: both; ">
+    <label><input type="checkbox" id="layer-edges" checked="checked"> edges</label>
+    <label><input type="checkbox" id="layer-brightRed" checked="checked"> brightRed</label>
+    <label><input type="checkbox" id="layer-generalIllumination" checked="checked"> generalIllumination</label>
+</div>
+</div>
+
+<div id="behaviors" class="column">
+<h3>Sense Tunables</h3>
+<div id="senseParams"></div>
+</div>
+
+<div class="column">
+<h3>Sense State</h3>
+<pre id="senseState"></pre>
+</div>
+
+</article>
+
+<script src="viewer.js"></script>
