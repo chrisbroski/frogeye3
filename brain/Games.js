@@ -1,6 +1,4 @@
 function Games(gameName) {
-    'use strict';
-
     var fs = require("fs"),
         Games,
         game;

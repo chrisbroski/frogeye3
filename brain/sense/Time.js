@@ -2,8 +2,6 @@ global.tunable.senses.since = {};
 global.tunable.senses.since.red = 300;
 
 function Time() {
-    "use strict";
-
     var lastRed;
 
     this.markRed = function markRed() {

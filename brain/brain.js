@@ -5,7 +5,6 @@ It also connects to a viewer for perception visualization and manual action cont
 
 global.tunable = {};
 global.tunable.senses = {};
-global.config = {"manual": false};
 
 var Senses = require('./Senses.js'),
     Viewer = require('./Viewer.js'),
@@ -31,8 +30,8 @@ if (process.argv.indexOf("-h") > -1 || process.argv.indexOf("--help") > -1) {
     console.log(`
 DESCRIPTION
 
-    Fetchbot is a system of robot behavior intended as a basic
-    starting point, and to research application architecture.
+    Frogeye is a platform for exploring the visual processing
+    in the vertebrate retina.
 
 ARGUMENTS
 
@@ -41,8 +40,6 @@ ARGUMENTS
     --game, -g <game>   Start brain in game mode. If more than one
                         game is available, list supported games.
 
-    --manual, -m        Start brain in manual control mode
-
     --width, -w         Run brain with specified visual resolution
                         (default 128) If an unsupported resolution
                         is specified, list valid parameters
@@ -50,10 +47,6 @@ ARGUMENTS
     --help, -h          This documentation
 `);
     process.exit();
-}
-
-if (process.argv.indexOf("-m") > -1 || process.argv.indexOf("--manual") > -1) {
-    global.config.manual = true;
 }
 
 cli_position = process.argv.indexOf("-g");

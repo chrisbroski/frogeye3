@@ -12,9 +12,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "sudo /home/pi/n/bin/node brain/brain.js",
-    "game": "node brain/brain.js --game",
-    "finddot": "node brain/brain.js --game find-dot-128",
-    "gpio": "sudo /home/pi/n/bin/node misc/gpio-tool.js"
+    "sim": "node brain/brain.js --game"
   },
   "repository": {
     "type": "git",

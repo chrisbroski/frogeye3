@@ -1,6 +1,4 @@
 function Viewer(senses) {
-    'use strict';
-
     var fs = require('fs'),
         http = require('http'),
         server = http.createServer(app),

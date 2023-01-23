@@ -1,12 +1,10 @@
 function Senses(visionWidth, visionHeight, game) {
-    'use strict';
-
     // Import libraries
     var spawn = require('child_process').spawn,
-        Fetchbot = require('./sense/Fetchbot.js'),
-        fetchbot = new Fetchbot(),
-        Time = require('./sense/Time.js'),
-        time = new Time(),
+        Frogeye = require('./sense/Frogeye.js'),
+        frogeye = new Frogeye(),
+        // Time = require('./sense/Time.js'),
+        // time = new Time(),
 
         // Declare private objects
         raw = {},
@@ -27,64 +25,65 @@ function Senses(visionWidth, visionHeight, game) {
     // *Sense state* is a collection of all current sensory data.
 
     // *current action* indicates what the creature is doing
-    state.currentAction = {};// ["", "", {}];
+    // state.currentAction = {};// ["", "", {}];
 
     // Detectors are booleans used to initiate behaviors
-    state.detectors = {};
+    // state.detectors = {};
 
     // *Perceptions* are the results of processing raw sense state
     // They can only be written by perceivers, but can be read by anything
     state.perceptions = {
         dimensions: [visionWidth, visionHeight],
-        // brightnessOverall: 0.0,
-        targetDirection: [0, 0, 0],
-        brightRed: [],
-        edges: []
+        brightnessOverall: 0.0,
+        edgesAny: [],
+        edgesSuppressLight: [],
+        edgesSuppressDark: [],
+        generalIllumination: []
     };
 
     // Sense state is publically readable (but not changeable).
     this.senseState = function (type) {
         if (type) {
             // Whoa whoa - shouldn't I be passing `currentAction` into this from Actions?
-            if (type === 'mood' || type === 'currentAction') {
-                return JSON.parse(JSON.stringify(state[type]));
-            }
+            // if (type === 'mood' || type === 'currentAction') {
+            //     return JSON.parse(JSON.stringify(state[type]));
+            // }
             return JSON.parse(JSON.stringify(state.perceptions[type]));
         }
         return JSON.parse(JSON.stringify(state));
     };
 
-    function downSampleToStream(data, newWidth) {
-        var newData, ii, x, iX, y, iY, width, newVal, newLength;
-        newData = [];
-        width = Math.ceil(visionWidth / newWidth);
-        newLength = newWidth * newWidth * 3 / 4;
+    // function downSampleToStream(data, newWidth) {
+    //     var newData, ii, x, iX, y, iY, width, newVal, newLength;
+    //     newData = [];
+    //     width = Math.ceil(visionWidth / newWidth);
+    //     newLength = newWidth * newWidth * 3 / 4;
+    //
+    //     for (ii = 0; ii < newLength; ii += 1) {
+    //         x = ii % newWidth * width;
+    //         y = Math.floor(ii / newWidth) * width;
+    //
+    //         newVal = 0;
+    //         for (iY = y; iY < width + y; iY += 1) {
+    //             for (iX = x; iX < width + x; iX += 1) {
+    //                 newVal += data[iY * visionWidth + iX];
+    //             }
+    //         }
+    //         newData[ii] = Math.floor(newVal / (width * width));
+    //     }
+    //
+    //     return Buffer.from(newData);
+    // }
 
-        for (ii = 0; ii < newLength; ii += 1) {
-            x = ii % newWidth * width;
-            y = Math.floor(ii / newWidth) * width;
-
-            newVal = 0;
-            for (iY = y; iY < width + y; iY += 1) {
-                for (iX = x; iX < width + x; iX += 1) {
-                    newVal += data[iY * visionWidth + iX];
-                }
-            }
-            newData[ii] = Math.floor(newVal / (width * width));
-        }
-
-        return Buffer.from(newData);
-    }
-
-    this.senseRaw = function () {
-        // return JSON.stringify({"luma": raw.luma.current, "chromaU": raw.chroma.U, "chromaV": raw.chroma.V});
-        return JSON.stringify(downSampleToStream(raw.luma.current, 64));
-    };
+    // this.senseRaw = function () {
+    //     // return JSON.stringify({"luma": raw.luma.current, "chromaU": raw.chroma.U, "chromaV": raw.chroma.V});
+    //     return JSON.stringify(downSampleToStream(raw.luma.current, 64));
+    // };
 
     // *current action* can be modified by the Actions module
-    this.currentAction = function currentAction(action, type, name, params) {
-        state.currentAction[action] = [type, name, params];
-    };
+    // this.currentAction = function currentAction(action, type, name, params) {
+    //     state.currentAction[action] = [type, name, params];
+    // };
 
     /*moods = {
         searching: 60,
@@ -135,26 +134,29 @@ function Senses(visionWidth, visionHeight, game) {
         }
     };*/
 
-    function detectors() {
-        state.detectors.reddot = !!state.perceptions.targetDirection.some(function (dir) {
-            return (dir > 0);
-        });
+    // function detectors() {
+        // state.detectors.reddot = !!state.perceptions.targetDirection.some(function (dir) {
+        //     return (dir > 0);
+        // });
         // state.detectors.lowLight = (state.perceptions.brightnessOverall < 0.1);
-    }
+    // }
 
     function perceive() {
         // state.perceptions.brightnessOverall = raw.brightness / imgPixelSize / 256;
         perceivers.frogEye(imgPixelSize);
-        detectors();
+        // detectors();
     }
     this.perceive = perceive;
 
     // *Perceivers* process raw sense state into meaningful information
     perceivers.frogEye = function () {
-        state.perceptions.edges = fetchbot.searchEdges(raw.luma.current, imgPixelSize, visionWidth);
-        state.perceptions.brightRed = fetchbot.searchBrightRed(raw.chroma.V, visionWidth / 2, raw.luma.current);
-        state.perceptions.targetDirection = fetchbot.redColumns(visionWidth / 2);
-        state.perceptions.generalIllumination = fetchbot.generalBrightness(raw.luma.current, imgPixelSize, visionWidth);
+        state.perceptions.edgesAny = frogeye.searchEdgesAny(raw.luma.current, imgPixelSize, visionWidth);
+        state.perceptions.edgesSuppressLight = frogeye.searchEdgesSuppressLight(raw.luma.current, imgPixelSize, visionWidth);
+        state.perceptions.edgesSuppressDark = frogeye.searchEdgesSuppressDark(raw.luma.current, imgPixelSize, visionWidth);
+        // state.perceptions.brightRed = fetchbot.searchBrightRed(raw.chroma.V, visionWidth / 2, raw.luma.current);
+        // state.perceptions.targetDirection = fetchbot.redColumns(visionWidth / 2);
+        state.perceptions.generalIllumination = frogeye.generalIllumination(raw.luma.current, imgPixelSize, visionWidth);
+        state.perceptions.brightnessOverall = frogeye.brightnessOverall(raw.luma.current);
     };
 
     // *Observers* populate raw sense state from a creature's sensors.
@@ -244,12 +246,12 @@ function Senses(visionWidth, visionHeight, game) {
         }
     };
 
-    attention.time = function () {
-        // Wait, should detectors be with their sense?
-        state.detectors.longTimeSinceRed = (global.tunable.senses.since.red < time.sinceRed());
-        setTimeout(attention.time, 5000);
-    };
-    attention.time();
+    // attention.time = function () {
+    //     // Wait, should detectors be with their sense?
+    //     state.detectors.longTimeSinceRed = (global.tunable.senses.since.red < time.sinceRed());
+    //     setTimeout(attention.time, 5000);
+    // };
+    // attention.time();
 
     this.start = function init() {
         console.log('Initialize senses module');

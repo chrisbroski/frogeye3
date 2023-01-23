@@ -9,8 +9,10 @@ viz.canvasHeight = 288;
 viz.layers = {};
 viz.layers.luma = {type: "raw"};
 viz.layers.generalIllumination = {color: [0, 0, 0, 1.0], downsample: 48, type: "cover"};
-viz.layers.edges = {color: [0, 0, 0, 0.8]};
-viz.layers.brightRed = {color: [255, 0, 0, 0.5], downsample: 2};
+viz.layers.edgesAny = {color: [0, 0, 255, 0.8]};
+viz.layers.edgesSuppressLight = {color: [0, 255, 0, 0.8]};
+viz.layers.edgesSuppressDark = {color: [255, 0, 0, 0.8]};
+// viz.layers.brightRed = {color: [255, 0, 0, 0.5], downsample: 2};
 
 function valToColor(val) {
     return "rgba(" + val + ", " + val + ", " + val + ", 0.9)";
@@ -45,7 +47,6 @@ function setControl(autoOrManual) {
 //     Object.keys(action).forEach(function (a) {
 //         var caPre = document.querySelector('#actions fieldset[data-action="' + a + '"] pre');
 //         caPre.textContent = action[a][0] + "\n" + action[a][1] + ": " + JSON.stringify(action[a][2]);
-//         //console.log(a, action[a]);
 //         if (a === "mood") {
 //             mood = action[a][1];
 //         }
@@ -72,29 +73,33 @@ function paintRaw(v, dots, downsample) {
 }
 
 // var displayed = false;
-function paintCover(v, dots, downsample) {
-    // console.log(dots.length / viz.canvasWidth);
-    downsample = downsample || 2;
-    var magWidth = 128 / downsample;
-    var ctx = viz.layers[v].ctx,
-        mag = viz.canvasWidth / magWidth;
-
+function paintCover(v, dots) {
+    // var mag = 3;
+    // var downsample = 2;
+    // var size = dots.length / 2;
+    // var magWidth = 128 / downsample;
+    var ctx = viz.layers[v].ctx;
+        // mag = viz.canvasWidth / magWidth;
+        // console.log();
+    var blockSize = Math.sqrt((viz.canvasWidth * viz.canvasHeight) / dots.length);
+    var cols = viz.canvasWidth / blockSize;
+    // console.log(cols);
     ctx.clearRect(0, 0, viz.canvasWidth, viz.canvasHeight);
     dots.forEach(function (dot, index) {
         // var x = (index % magWidth) * mag,
         //     y = (Math.floor(index / magWidth)) * mag;
         // var col = (ii % Math.ceil(visionWidth / size));
         // var row = Math.floor(ii / Math.ceil(visionWidth / size));
-        var x = (index % 8) * 48;
+        var x = (index % cols) * blockSize;
             // y = index % 8 * 48;
-        var y = Math.floor(index / 8) * 48;
+        var y = Math.floor(index / cols) * blockSize;
         // if (!displayed) {
         //     console.log(index, x, y);
         // }
 
         ctx.fillStyle = valToColor(dot);
         ctx.beginPath();
-        ctx.fillRect(x, y, 48, 48);
+        ctx.fillRect(x, y, blockSize, blockSize);
         ctx.closePath();
         ctx.fill();
     });
@@ -198,7 +203,7 @@ function senseStateReceived(jsonState) {
     Object.keys(viz.layers).forEach(function (v) {
         if (viz.layers[v].type !== "raw") {
             if (viz.layers[v].type === "cover") {
-                paintCover(v, jsonState.perceptions[v], );
+                paintCover(v, jsonState.perceptions[v]);
             } else {
                 paintViz(v, jsonState.perceptions[v]);
             }
@@ -527,7 +532,6 @@ function editBehavior() {
 //
 //     // if moods, Build mood dropdown
 //     if (actionData.mood) {
-//         //console.log(actionData.mood.perform.setMood[0].options);
 //         moods = actionData.mood.perform.setMood[0].options;
 //         moodSelect = document.getElementById("mood-select");
 //         moods.forEach(function (m) {
@@ -710,7 +714,6 @@ function init() {
             bTable.appendChild(option);
         } else {
             // update list
-            window.console.log(editingBehavior);
             bTable.options[editingBehavior].textContent = behaviorDisplay(createBehaviorData());
         }
     };*/
